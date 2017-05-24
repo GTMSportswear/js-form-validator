@@ -1,0 +1,46 @@
+{
+  "name": "js-form-validator",
+  "version": "1.0.0",
+  "description": "Utility for validating forms",
+  "main": "js-form-validator.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GTMSportswear/js-form-validator.git"
+  },
+  "keywords": [
+    "gtmsportswear",
+    "gtm"
+  ],
+  "author": "Chris Young",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/GTMSportswear/js-form-validator/issues"
+  },
+  "homepage": "https://github.com/GTMSportswear/js-form-validator#readme",
+  "devDependencies": {
+    "jspm": "^0.16.53",
+    "systemjs": "^0.20.12",
+    "traceur": "0.0.111",
+    "tslint": "^5.3.2",
+    "typescript": "^2.3.3"
+  },
+  "jspm": {
+    "main": "src/js-form-validator.ts",
+    "directories": {
+      "baseURL": "src",
+      "lib": "src",
+      "packages": "src"
+    },
+    "configFile": "system.conf.js",
+    "dependencies": {
+      "GTMSportswear/js-utilities": "github:GTMSportswear/js-utilities@^1.0.0"
+    },
+    "devDependencies": {
+      "traceur": "github:jmcriffey/bower-traceur@0.0.93",
+      "traceur-runtime": "github:jmcriffey/bower-traceur-runtime@0.0.93"
+    }
+  }
+}
