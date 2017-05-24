@@ -64,8 +64,11 @@ export class FormValidator {
     
     if (valid > 0) {
       if (null === inputId) {
+        const st = wrap.querySelector('[class^="simptip"]');
         wrap.classList.remove('error');
-        wrap.querySelector('[class^="simptip"]').removeAttribute('data-tooltip');
+
+        if (st !== null)
+          st.removeAttribute('data-tooltip');
 
         if (input.getAttribute('data-show_success') !== 'false')
           wrap.classList.add('approved');
@@ -127,11 +130,14 @@ export class FormValidator {
   public static setInputError(input: HTMLElement, errorMsg: string): void {
     if (undefined === input || null === input) return;
 
-    const wrap = closest(input, '.input-wrap');
+    const wrap = closest(input, '.input-wrap'),
+          wrapTip = wrap.querySelector('[class^="simptip"]');
     
-    wrap.querySelector('[class^="simptip"]').setAttribute('data-tooltip', errorMsg);
     wrap.classList.add('error');
     wrap.classList.remove('approved');
+
+    if (wrapTip !== null)
+      wrapTip.setAttribute('data-tooltip', errorMsg);
   }
 
   /**
