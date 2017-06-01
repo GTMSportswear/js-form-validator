@@ -12,7 +12,7 @@ export class FormValidator {
    * @param input
    * @return boolean True if validated, false otherwise.
    */
-  public static validate(element: HTMLElement): boolean {
+  public static Validate(element: HTMLElement): boolean {
     if (undefined === element || null === element) return false;
 
     const input = <HTMLInputElement>element,
@@ -22,10 +22,10 @@ export class FormValidator {
       inputId = element.getAttribute('data-validate_message_id');
 
     let inputValue = input.value,
-        valid = 0,
-        tooltip = '',
-        invalidMsg = element.getAttribute('data-validate_message'),
-        emptyMsg = element.getAttribute('data-empty_message');
+      valid = 0,
+      tooltip = '',
+      invalidMsg = element.getAttribute('data-validate_message'),
+      emptyMsg = element.getAttribute('data-empty_message');
 
     const allowEmptyAttribute = input.getAttribute('data-empty_allowed');
     let allowEmpty = (null !== allowEmptyAttribute && allowEmptyAttribute === '1');
@@ -49,7 +49,7 @@ export class FormValidator {
       if (inputs.length <= 0) return false;
 
       Array.prototype.forEach.call(inputs, (i: HTMLInputElement) => {
-        if (this.validate_rule('checkbox', i.checked, allowEmpty))
+        if (this.ValidateRule('checkbox', i.checked, allowEmpty))
           numChecked++;
       });
 
@@ -57,17 +57,16 @@ export class FormValidator {
         valid = 1;
     }
     else if (type === 'select') {
-      const selectedOption = selectElement.options[selectElement.selectedIndex];
-      if (selectedOption.getAttribute('disabled') !== null)
-        valid = -1;
-      else
-        valid = 1;
+      const selectedIndex = selectElement.selectedIndex, 
+            selectedOption = selectElement.options[selectedIndex];
+
+      valid = (selectedIndex === -1 || selectedOption.getAttribute('disabled') !== null) ? -1 : 1;
     }
     else {
       if (allowEmpty && !inputValue.length)
         valid = 1;
       else
-        valid = this.validate_rule(type, inputValue, allowEmpty);
+        valid = this.ValidateRule(type, inputValue, allowEmpty);
     }
 
     if (valid > 0) {
@@ -118,13 +117,13 @@ export class FormValidator {
    * @param form Form node to validate
    * @return boolean True on complete validation, false otherwise.
    */
-  public static validateForm(form: HTMLElement): boolean {
+  public static ValidateForm(form: HTMLElement): boolean {
     if (undefined === form || null === form) return false;
 
     let invalidCount = 0;
 
-    Array.prototype.forEach.call(form.querySelectorAll('[data-validate]'), (element: Element) => {
-      if (!this.validate(<HTMLElement>element))
+    Array.prototype.forEach.call(form.querySelectorAll('[data-validate]'), (element: HTMLElement) => {
+      if (!this.Validate(element))
         invalidCount++;
     });
 
@@ -135,7 +134,7 @@ export class FormValidator {
    * This method will allow you to set a error message directly
    * on an input without going through the validation process.
    */
-  public static setInputError(input: HTMLElement, errorMsg: string): void {
+  public static SetInputError(input: HTMLElement, errorMsg: string): void {
     if (undefined === input || null === input) return;
 
     const wrap = closest(input, '.input-wrap'),
@@ -153,7 +152,7 @@ export class FormValidator {
    * Useful for async environments.
    * @param input
    */
-  public static removeInputFeedback(input: HTMLElement): void {
+  public static RemoveInputFeedback(input: HTMLElement): void {
     if (undefined === input || null === input) return;
     let inputNode = <HTMLInputElement>input;
 
@@ -169,7 +168,7 @@ export class FormValidator {
    * Searches for all inputs with a data-validate class and adds validation event listeners.
    * @param context node to search upon.
    */
-  public static addEventListeners(context: HTMLElement): void {
+  public static AddEventListeners(context: HTMLElement): void {
     if (undefined === context || null === context)
       context = document.body;
 
@@ -191,17 +190,17 @@ export class FormValidator {
 
     nodeList.forEach(node => {
       node.addEventListener('focus', e => {
-        this.focusEvent(<HTMLElement>e.currentTarget);
+        this.FocusEvent(<HTMLElement>e.currentTarget);
       });
       node.addEventListener('blur', e => {
-        this.blurEvent(<HTMLElement>e.currentTarget);
+        this.BlurEvent(<HTMLElement>e.currentTarget);
       });
     });
 
     // event to remove tooltips when the input gets focused and then to revalidate when blurred
     Array.prototype.forEach.call(context.querySelectorAll('input[data-validate], textarea[data-validate], select[data-validate]'), (input: HTMLElement) => {
       input.addEventListener('blur', e => {
-        this.validate(<HTMLInputElement>e.currentTarget);
+        this.Validate(<HTMLInputElement>e.currentTarget);
       });
       input.addEventListener('focus', function (e) {
         const wrap = closest(this, '.input-wrap'),
@@ -243,11 +242,11 @@ export class FormValidator {
    * to add a new event listener to this method or else
    * it will not get called on every page.
    */
-  private static focusEvent(input: HTMLElement): void {
+  private static FocusEvent(input: HTMLElement): void {
     closest(input, '.input-wrap').classList.add('active');
   }
 
-  private static blurEvent(input: HTMLElement): void {
+  private static BlurEvent(input: HTMLElement): void {
     closest(input, '.input-wrap').classList.remove('active');
   }
 
@@ -256,7 +255,7 @@ export class FormValidator {
       0: Not empty, but invalid.
       -1: empty
   */
-  private static validate_rule(type, value, allowEmpty): number {
+  private static ValidateRule(type: string, value: any, allowEmpty: boolean): number {
     let status = 0;
 
     switch (type) {
@@ -292,7 +291,7 @@ export class FormValidator {
 
       case 'addressStreetNoPO':
         if (!allowEmpty && !value.length) return -1;
-        if (this.validate_rule('addressStreet', value, allowEmpty) === 1)
+        if (this.ValidateRule('addressStreet', value, allowEmpty) === 1)
           status = (value.toLowerCase().split('.').join('').indexOf('po box') >= 0) ? 0 : 1;
         break;
 
