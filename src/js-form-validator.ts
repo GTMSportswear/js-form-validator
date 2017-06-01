@@ -1,7 +1,6 @@
 import { closest } from './github/gtmsportswear/js-utilities@1.0.0/js-utilities';
 
 export class FormValidator {
-
   /**
    * Validates a given input if validation attributes are present.
    * Validation attributes for inputs:
