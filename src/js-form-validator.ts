@@ -12,18 +12,20 @@ export class FormValidator {
    * @param input
    * @return boolean True if validated, false otherwise.
    */
-  public static validate(input: HTMLInputElement): boolean {
-    if (undefined === input || null === input) return false;
+  public static validate(element: HTMLElement): boolean {
+    if (undefined === element || null === element) return false;
 
-    const type = input.getAttribute('data-validate'),
-      wrap = closest(input, '.input-wrap'),
-      inputId = input.getAttribute('data-validate_message_id');
+    const input = <HTMLInputElement>element,
+      selectElement = element.tagName === 'SELECT' ? <HTMLSelectElement>element : null,
+      type = element.getAttribute('data-validate'),
+      wrap = closest(element, '.input-wrap'),
+      inputId = element.getAttribute('data-validate_message_id');
 
     let inputValue = input.value,
-      valid = 0,
-      tooltip = '',
-      invalidMsg = input.getAttribute('data-validate_message'),
-      emptyMsg = input.getAttribute('data-empty_message');
+        valid = 0,
+        tooltip = '',
+        invalidMsg = element.getAttribute('data-validate_message'),
+        emptyMsg = element.getAttribute('data-empty_message');
 
     const allowEmptyAttribute = input.getAttribute('data-empty_allowed');
     let allowEmpty = (null !== allowEmptyAttribute && allowEmptyAttribute === '1');
@@ -52,6 +54,13 @@ export class FormValidator {
       });
 
       if (numChecked > 0)
+        valid = 1;
+    }
+    else if (type === 'select') {
+      const selectedOption = selectElement.options[selectElement.selectedIndex];
+      if (selectedOption.getAttribute('disabled') !== null)
+        valid = -1;
+      else
         valid = 1;
     }
     else {
@@ -114,8 +123,8 @@ export class FormValidator {
 
     let invalidCount = 0;
 
-    Array.prototype.forEach.call(form.querySelectorAll('[data-validate]'), input => {
-      if (!this.validate(input))
+    Array.prototype.forEach.call(form.querySelectorAll('[data-validate]'), (element: Element) => {
+      if (!this.validate(<HTMLElement>element))
         invalidCount++;
     });
 
