@@ -1,7 +1,7 @@
 import { closest } from './github/gtmsportswear/js-utilities@1.0.0/js-utilities';
 
 export class FormValidator {
-  
+
   /**
    * Validates a given input if validation attributes are present.
    * Validation attributes for inputs:
@@ -17,15 +17,15 @@ export class FormValidator {
     if (undefined === input || null === input) return false;
 
     const type = input.getAttribute('data-validate'),
-          wrap = closest(input, '.input-wrap'),
-          inputId = input.getAttribute('data-validate_message_id');
+      wrap = closest(input, '.input-wrap'),
+      inputId = input.getAttribute('data-validate_message_id');
 
     let inputValue = input.value,
-        valid = 0,
-        tooltip = '',
-        invalidMsg = input.getAttribute('data-validate_message'),
-        emptyMsg = input.getAttribute('data-empty_message');
-    
+      valid = 0,
+      tooltip = '',
+      invalidMsg = input.getAttribute('data-validate_message'),
+      emptyMsg = input.getAttribute('data-empty_message');
+
     const allowEmptyAttribute = input.getAttribute('data-empty_allowed');
     let allowEmpty = (null !== allowEmptyAttribute && allowEmptyAttribute === '1');
 
@@ -48,7 +48,7 @@ export class FormValidator {
       if (inputs.length <= 0) return false;
 
       Array.prototype.forEach.call(inputs, (i: HTMLInputElement) => {
-        if (this.validate_rule('checkbox', i.checked))
+        if (this.validate_rule('checkbox', i.checked, allowEmpty))
           numChecked++;
       });
 
@@ -59,9 +59,9 @@ export class FormValidator {
       if (allowEmpty && !inputValue.length)
         valid = 1;
       else
-        valid = this.validate_rule(type, inputValue);
+        valid = this.validate_rule(type, inputValue, allowEmpty);
     }
-    
+
     if (valid > 0) {
       if (null === inputId) {
         const st = wrap.querySelector('[class^="simptip"]');
@@ -102,7 +102,7 @@ export class FormValidator {
 
     return false;
   }
-  
+
   /**
    * Validates an entire form. Iterates through each element on the
    * given container and checks for the data-validate property. If
@@ -112,7 +112,7 @@ export class FormValidator {
    */
   public static validateForm(form: HTMLElement): boolean {
     if (undefined === form || null === form) return false;
-    
+
     let invalidCount = 0;
 
     Array.prototype.forEach.call(form.querySelectorAll('[data-validate]'), input => {
@@ -131,8 +131,8 @@ export class FormValidator {
     if (undefined === input || null === input) return;
 
     const wrap = closest(input, '.input-wrap'),
-          wrapTip = wrap.querySelector('[class^="simptip"]');
-    
+      wrapTip = wrap.querySelector('[class^="simptip"]');
+
     wrap.classList.add('error');
     wrap.classList.remove('approved');
 
@@ -164,7 +164,7 @@ export class FormValidator {
   public static addEventListeners(context: HTMLElement): void {
     if (undefined === context || null === context)
       context = document.body;
-    
+
     const nodeList: HTMLElement[] = [];
     Array.prototype.forEach.call(context.querySelectorAll('input, select, textarea'), (el: HTMLElement) => {
       'input[type="submit"], input[type="button"], input[type="radio"]';
@@ -205,7 +205,7 @@ export class FormValidator {
           wrapTip.removeAttribute('data-tooltip');
       });
     });
-    
+
     // focus on wrap select
     Array.prototype.forEach.call(context.querySelectorAll('.input-wrap'), (input: HTMLElement) => {
       input.addEventListener('click', function (e) {
@@ -248,7 +248,7 @@ export class FormValidator {
       0: Not empty, but invalid.
       -1: empty
   */
-  private static validate_rule(type, value): number {
+  private static validate_rule(type, value, allowEmpty): number {
     let status = 0;
 
     switch (type) {
@@ -259,6 +259,7 @@ export class FormValidator {
         break;
 
       case 'password_old':
+        if (!allowEmpty && !value.length) return -1;
         status = value.length > 0 ? 1 : -1;
         break;
 
@@ -277,11 +278,13 @@ export class FormValidator {
         break;
 
       case 'addressStreet':
+        if (!allowEmpty && !value.length) return -1;
         status = (/^[0-9a-z\.\-\,\#\%\&\*\+\' ]+$/i.test(value)) ? 1 : 0;
         break;
 
       case 'addressStreetNoPO':
-        if (this.validate_rule('addressStreet', value) === 1)
+        if (!allowEmpty && !value.length) return -1;
+        if (this.validate_rule('addressStreet', value, allowEmpty) === 1)
           status = (value.toLowerCase().split('.').join('').indexOf('po box') >= 0) ? 0 : 1;
         break;
 
@@ -291,14 +294,17 @@ export class FormValidator {
         break;
 
       case 'zip':
+        if (!allowEmpty && !value.length) return -1;
         status = /^[0-9]{5}(\-|\+)?([0-9]{4})?$/.test(value) ? 1 : 0;
         break;
 
       case 'zip--canada':
+        if (!allowEmpty && !value.length) return -1;
         status = /^[ABCEGHJKLMNPRSTVXY]{1}\d{1}[A-Z]{1} *\d{1}[A-Z]{1}\d{1}$/.test(value) ? 1 : 0;
         break;
 
       case 'phone':
+        if (!allowEmpty && !value.length) return -1;
         let vals = value.split('x');
         for (let i = 0, l = vals.length; i < l; i++)
           vals[i] = vals[i].replace(/\D/g, '');
@@ -307,11 +313,12 @@ export class FormValidator {
         break;
 
       case 'file':
+        if (!allowEmpty && !value.length) return -1;
         status = value.length > 0 ? 1 : 0;
         break;
 
       case 'text':
-        if (!value.length) status = -1;
+        if (!allowEmpty && !value.length) return -1;
         status = /^[A-Z0-9\-\.\,\'\"\_\(\)\*\&\^\%\$\#\@\!\+\[\]\=\{\}\:\;\?\\\/<> ]+$/im.test(value) ? 1 : 0;
         break;
 
@@ -320,19 +327,23 @@ export class FormValidator {
         break;
 
       case 'creditcard':
+        if (!allowEmpty && !value.length) return -1;
         // will check against VISA, Discover, Amex, and MasterCard
         status = /^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|3[47][0-9]{13}|6(?:0110[0-9]|011[2-4][0-9]|01174|0117[7-9]|0118[6-9]|0119[0-9]|4[4-9][0-9]{3}|5[0-9]{4})[0-9]{10})$/.test(value) ? 1 : 0;
         break;
 
       case 'creditcard-cvs':
+        if (!allowEmpty && !value.length) return -1;
         status = /^[0-9]{3,5}$/.test(value) ? 1 : 0;
         break;
 
       case 'ponumber':
+        if (!allowEmpty && !value.length) return -1;
         status = /^[0-9a-z \,\.\-\%\$\#\@\&\(\)\_]+$/i.test(value) ? 1 : 0;
         break;
 
       case 'promocode':
+        if (!allowEmpty && !value.length) return -1;
         status = /^[0-9a-z]+$/i.test(value) ? 1 : 0;
         break;
 
