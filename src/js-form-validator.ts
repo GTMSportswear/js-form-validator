@@ -60,7 +60,7 @@ export class FormValidator {
       const selectedIndex = selectElement.selectedIndex, 
             selectedOption = selectElement.options[selectedIndex];
 
-      valid = (selectedIndex === -1 || selectedOption.getAttribute('disabled') !== null) ? -1 : 1;
+      valid = (allowEmpty || (selectedIndex !== -1 && selectedOption.getAttribute('disabled') === null)) ? 1 : -1;
     }
     else {
       if (allowEmpty && !inputValue.length)
