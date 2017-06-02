@@ -1,7 +1,6 @@
 import { closest } from './github/gtmsportswear/js-utilities@1.0.0/js-utilities';
 
 export class FormValidator {
-  
   /**
    * Validates a given input if validation attributes are present.
    * Validation attributes for inputs:
@@ -13,19 +12,21 @@ export class FormValidator {
    * @param input
    * @return boolean True if validated, false otherwise.
    */
-  public static validate(input: HTMLInputElement): boolean {
-    if (undefined === input || null === input) return false;
+  public static Validate(element: HTMLElement): boolean {
+    if (undefined === element || null === element) return false;
 
-    const type = input.getAttribute('data-validate'),
-          wrap = closest(input, '.input-wrap'),
-          inputId = input.getAttribute('data-validate_message_id');
+    const input = <HTMLInputElement>element,
+      selectElement = element.tagName === 'SELECT' ? <HTMLSelectElement>element : null,
+      type = element.getAttribute('data-validate'),
+      wrap = closest(element, '.input-wrap'),
+      inputId = element.getAttribute('data-validate_message_id');
 
     let inputValue = input.value,
-        valid = 0,
-        tooltip = '',
-        invalidMsg = input.getAttribute('data-validate_message'),
-        emptyMsg = input.getAttribute('data-empty_message');
-    
+      valid = 0,
+      tooltip = '',
+      invalidMsg = element.getAttribute('data-validate_message'),
+      emptyMsg = element.getAttribute('data-empty_message');
+
     const allowEmptyAttribute = input.getAttribute('data-empty_allowed');
     let allowEmpty = (null !== allowEmptyAttribute && allowEmptyAttribute === '1');
 
@@ -48,20 +49,26 @@ export class FormValidator {
       if (inputs.length <= 0) return false;
 
       Array.prototype.forEach.call(inputs, (i: HTMLInputElement) => {
-        if (this.validate_rule('checkbox', i.checked))
+        if (this.ValidateRule('checkbox', i.checked, allowEmpty))
           numChecked++;
       });
 
       if (numChecked > 0)
         valid = 1;
     }
+    else if (type === 'select') {
+      const selectedIndex = selectElement.selectedIndex, 
+            selectedOption = selectElement.options[selectedIndex];
+
+      valid = (allowEmpty || (selectedIndex !== -1 && selectedOption.getAttribute('disabled') === null)) ? 1 : -1;
+    }
     else {
       if (allowEmpty && !inputValue.length)
         valid = 1;
       else
-        valid = this.validate_rule(type, inputValue);
+        valid = this.ValidateRule(type, inputValue, allowEmpty);
     }
-    
+
     if (valid > 0) {
       if (null === inputId) {
         const st = wrap.querySelector('[class^="simptip"]');
@@ -102,7 +109,7 @@ export class FormValidator {
 
     return false;
   }
-  
+
   /**
    * Validates an entire form. Iterates through each element on the
    * given container and checks for the data-validate property. If
@@ -110,13 +117,13 @@ export class FormValidator {
    * @param form Form node to validate
    * @return boolean True on complete validation, false otherwise.
    */
-  public static validateForm(form: HTMLElement): boolean {
+  public static ValidateForm(form: HTMLElement): boolean {
     if (undefined === form || null === form) return false;
-    
+
     let invalidCount = 0;
 
-    Array.prototype.forEach.call(form.querySelectorAll('[data-validate]'), input => {
-      if (!this.validate(input))
+    Array.prototype.forEach.call(form.querySelectorAll('[data-validate]'), (element: HTMLElement) => {
+      if (!this.Validate(element))
         invalidCount++;
     });
 
@@ -127,12 +134,12 @@ export class FormValidator {
    * This method will allow you to set a error message directly
    * on an input without going through the validation process.
    */
-  public static setInputError(input: HTMLElement, errorMsg: string): void {
+  public static SetInputError(input: HTMLElement, errorMsg: string): void {
     if (undefined === input || null === input) return;
 
     const wrap = closest(input, '.input-wrap'),
-          wrapTip = wrap.querySelector('[class^="simptip"]');
-    
+      wrapTip = wrap.querySelector('[class^="simptip"]');
+
     wrap.classList.add('error');
     wrap.classList.remove('approved');
 
@@ -145,7 +152,7 @@ export class FormValidator {
    * Useful for async environments.
    * @param input
    */
-  public static removeInputFeedback(input: HTMLElement): void {
+  public static RemoveInputFeedback(input: HTMLElement): void {
     if (undefined === input || null === input) return;
     let inputNode = <HTMLInputElement>input;
 
@@ -161,10 +168,10 @@ export class FormValidator {
    * Searches for all inputs with a data-validate class and adds validation event listeners.
    * @param context node to search upon.
    */
-  public static addEventListeners(context: HTMLElement): void {
+  public static AddEventListeners(context: HTMLElement): void {
     if (undefined === context || null === context)
       context = document.body;
-    
+
     const nodeList: HTMLElement[] = [];
     Array.prototype.forEach.call(context.querySelectorAll('input, select, textarea'), (el: HTMLElement) => {
       'input[type="submit"], input[type="button"], input[type="radio"]';
@@ -183,17 +190,17 @@ export class FormValidator {
 
     nodeList.forEach(node => {
       node.addEventListener('focus', e => {
-        this.focusEvent(<HTMLElement>e.currentTarget);
+        this.FocusEvent(<HTMLElement>e.currentTarget);
       });
       node.addEventListener('blur', e => {
-        this.blurEvent(<HTMLElement>e.currentTarget);
+        this.BlurEvent(<HTMLElement>e.currentTarget);
       });
     });
 
     // event to remove tooltips when the input gets focused and then to revalidate when blurred
     Array.prototype.forEach.call(context.querySelectorAll('input[data-validate], textarea[data-validate], select[data-validate]'), (input: HTMLElement) => {
       input.addEventListener('blur', e => {
-        this.validate(<HTMLInputElement>e.currentTarget);
+        this.Validate(<HTMLInputElement>e.currentTarget);
       });
       input.addEventListener('focus', function (e) {
         const wrap = closest(this, '.input-wrap'),
@@ -205,7 +212,7 @@ export class FormValidator {
           wrapTip.removeAttribute('data-tooltip');
       });
     });
-    
+
     // focus on wrap select
     Array.prototype.forEach.call(context.querySelectorAll('.input-wrap'), (input: HTMLElement) => {
       input.addEventListener('click', function (e) {
@@ -235,11 +242,11 @@ export class FormValidator {
    * to add a new event listener to this method or else
    * it will not get called on every page.
    */
-  private static focusEvent(input: HTMLElement): void {
+  private static FocusEvent(input: HTMLElement): void {
     closest(input, '.input-wrap').classList.add('active');
   }
 
-  private static blurEvent(input: HTMLElement): void {
+  private static BlurEvent(input: HTMLElement): void {
     closest(input, '.input-wrap').classList.remove('active');
   }
 
@@ -248,7 +255,7 @@ export class FormValidator {
       0: Not empty, but invalid.
       -1: empty
   */
-  private static validate_rule(type, value): number {
+  private static ValidateRule(type: string, value: any, allowEmpty: boolean): number {
     let status = 0;
 
     switch (type) {
@@ -259,6 +266,7 @@ export class FormValidator {
         break;
 
       case 'password_old':
+        if (!allowEmpty && !value.length) return -1;
         status = value.length > 0 ? 1 : -1;
         break;
 
@@ -277,11 +285,13 @@ export class FormValidator {
         break;
 
       case 'addressStreet':
+        if (!allowEmpty && !value.length) return -1;
         status = (/^[0-9a-z\.\-\,\#\%\&\*\+\' ]+$/i.test(value)) ? 1 : 0;
         break;
 
       case 'addressStreetNoPO':
-        if (this.validate_rule('addressStreet', value) === 1)
+        if (!allowEmpty && !value.length) return -1;
+        if (this.ValidateRule('addressStreet', value, allowEmpty) === 1)
           status = (value.toLowerCase().split('.').join('').indexOf('po box') >= 0) ? 0 : 1;
         break;
 
@@ -291,14 +301,17 @@ export class FormValidator {
         break;
 
       case 'zip':
+        if (!allowEmpty && !value.length) return -1;
         status = /^[0-9]{5}(\-|\+)?([0-9]{4})?$/.test(value) ? 1 : 0;
         break;
 
       case 'zip--canada':
+        if (!allowEmpty && !value.length) return -1;
         status = /^[ABCEGHJKLMNPRSTVXY]{1}\d{1}[A-Z]{1} *\d{1}[A-Z]{1}\d{1}$/.test(value) ? 1 : 0;
         break;
 
       case 'phone':
+        if (!allowEmpty && !value.length) return -1;
         let vals = value.split('x');
         for (let i = 0, l = vals.length; i < l; i++)
           vals[i] = vals[i].replace(/\D/g, '');
@@ -307,11 +320,12 @@ export class FormValidator {
         break;
 
       case 'file':
+        if (!allowEmpty && !value.length) return -1;
         status = value.length > 0 ? 1 : 0;
         break;
 
       case 'text':
-        if (!value.length) status = -1;
+        if (!allowEmpty && !value.length) return -1;
         status = /^[A-Z0-9\-\.\,\'\"\_\(\)\*\&\^\%\$\#\@\!\+\[\]\=\{\}\:\;\?\\\/<> ]+$/im.test(value) ? 1 : 0;
         break;
 
@@ -320,19 +334,23 @@ export class FormValidator {
         break;
 
       case 'creditcard':
+        if (!allowEmpty && !value.length) return -1;
         // will check against VISA, Discover, Amex, and MasterCard
         status = /^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|3[47][0-9]{13}|6(?:0110[0-9]|011[2-4][0-9]|01174|0117[7-9]|0118[6-9]|0119[0-9]|4[4-9][0-9]{3}|5[0-9]{4})[0-9]{10})$/.test(value) ? 1 : 0;
         break;
 
       case 'creditcard-cvs':
+        if (!allowEmpty && !value.length) return -1;
         status = /^[0-9]{3,5}$/.test(value) ? 1 : 0;
         break;
 
       case 'ponumber':
+        if (!allowEmpty && !value.length) return -1;
         status = /^[0-9a-z \,\.\-\%\$\#\@\&\(\)\_]+$/i.test(value) ? 1 : 0;
         break;
 
       case 'promocode':
+        if (!allowEmpty && !value.length) return -1;
         status = /^[0-9a-z]+$/i.test(value) ? 1 : 0;
         break;
 
