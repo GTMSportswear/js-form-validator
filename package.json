@@ -28,7 +28,7 @@
     "typescript": "^2.3.3"
   },
   "jspm": {
-    "main": "src/js-form-validator.ts",
+    "main": "dist/js-form-validator.ts",
     "directories": {
       "baseURL": "src",
       "lib": "src",
