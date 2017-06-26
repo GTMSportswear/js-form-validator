@@ -312,9 +312,8 @@ export class FormValidator {
 
       case 'phone':
         if (!allowEmpty && !value.length) return -1;
-        let vals = value.split('x');
-        value = vals.join('x').replace(/^1/, ''); // remove leading 1 if added, only for US
-        status = /^[0-9\-\+\s\(\)]{7,16}$/.test(value) ? 1 : 0;
+        const digits = value.match(/\d+/g);
+        status = /^(?=(?:.{7}|.{10})$)[0-9]*$/.test(digits) ? 1 : 0;
         break;
 
       case 'file':
