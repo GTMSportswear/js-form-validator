@@ -1,4 +1,4 @@
-import { closest } from './github/gtmsportswear/js-utilities@1.0.0/js-utilities';
+import { closest } from './github/GTMSportswear/js-utilities@1.0.0/js-utilities';
 
 export class FormValidator {
   /**
@@ -313,7 +313,7 @@ export class FormValidator {
       case 'phone':
         if (!allowEmpty && !value.length) return -1;
         const digits = value.match(/\d+/g);
-        status = /^(?=(?:.{7}|.{10})$)[0-9]*$/.test(digits) ? 1 : 0;
+        status = digits.length > 0 && /^(?=(?:.{7}|.{10})$)[0-9]*$/.test(digits.join('')) ? 1 : 0;
         break;
 
       case 'file':
