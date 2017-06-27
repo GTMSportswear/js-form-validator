@@ -1,6 +1,6 @@
 {
   "name": "js-form-validator",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Utility for validating forms",
   "main": "js-form-validator.ts",
   "scripts": {
@@ -21,8 +21,14 @@
   },
   "homepage": "https://github.com/GTMSportswear/js-form-validator#readme",
   "devDependencies": {
+    "@types/qunit": "^2.0.31",
     "jspm": "^0.16.53",
-    "systemjs": "^0.20.12",
+    "karma": "^1.7.0",
+    "karma-chrome-launcher": "^2.2.0",
+    "karma-qunit": "^1.2.1",
+    "karma-systemjs": "^0.16.0",
+    "qunitjs": "^2.3.3",
+    "systemjs": "^0.19.40",
     "traceur": "0.0.111",
     "tslint": "^5.3.2",
     "typescript": "^2.3.3"

@@ -1,4 +1,4 @@
-import { closest } from './github/gtmsportswear/js-utilities@1.0.0/js-utilities';
+import { closest } from './github/GTMSportswear/js-utilities@1.0.0/js-utilities';
 
 export class FormValidator {
   /**
@@ -312,11 +312,8 @@ export class FormValidator {
 
       case 'phone':
         if (!allowEmpty && !value.length) return -1;
-        let vals = value.split('x');
-        for (let i = 0, l = vals.length; i < l; i++)
-          vals[i] = vals[i].replace(/\D/g, '');
-        value = vals.join('x').replace(/^1/, ''); // remove leading 1 if added, only for US
-        status = /^[0-9x]{7,16}$/.test(value) ? 1 : 0;
+        const digits = value.match(/\d+/g);
+        status = digits.length > 0 && /^(?=(?:.{7}|.{10})$)[0-9]*$/.test(digits.join('')) ? 1 : 0;
         break;
 
       case 'file':
