@@ -1,4 +1,4 @@
-import { closest } from './github/GTMSportswear/js-utilities@1.0.0/js-utilities';
+import { closest } from './github/gtmsportswear/js-utilities@1.0.0/js-utilities';
 
 export class FormValidator {
   /**
@@ -17,6 +17,8 @@ export class FormValidator {
 
     const input = <HTMLInputElement>element,
       selectElement = element.tagName === 'SELECT' ? <HTMLSelectElement>element : null,
+      minLength = input.getAttribute('minlength'),
+      maxLength = input.getAttribute('maxlenght'),
       type = element.getAttribute('data-validate'),
       wrap = closest(element, '.input-wrap'),
       inputId = element.getAttribute('data-validate_message_id');
@@ -65,6 +67,9 @@ export class FormValidator {
     else {
       if (allowEmpty && !inputValue.length)
         valid = 1;
+      else if (!this.HasValidLength(inputValue, parseInt(minLength, 10), parseInt(maxLength, 10))) {
+        valid = -2;
+      }
       else
         valid = this.ValidateRule(type, inputValue, allowEmpty);
     }
@@ -95,6 +100,9 @@ export class FormValidator {
 
       if (valid === 0)
         tooltip = invalidMsg;
+      else if (valid === -2) {
+        tooltip = this.GetInputLengthErrorMessage(inputValue, parseInt(minLength, 10), parseInt(maxLength, 10));
+      }
       else
         tooltip = emptyMsg;
     }
@@ -312,8 +320,11 @@ export class FormValidator {
 
       case 'phone':
         if (!allowEmpty && !value.length) return -1;
-        const digits = value.match(/\d+/g);
-        status = digits.length > 0 && /^(?=(?:.{7}|.{10})$)[0-9]*$/.test(digits.join('')) ? 1 : 0;
+        let vals = value.split('x');
+        for (let i = 0, l = vals.length; i < l; i++)
+          vals[i] = vals[i].replace(/\D/g, '');
+        value = vals.join('x').replace(/^1/, ''); // remove leading 1 if added, only for US
+        status = /^[0-9x]{7,16}$/.test(value) ? 1 : 0;
         break;
 
       case 'file':
@@ -355,5 +366,35 @@ export class FormValidator {
         status = 0;
     }
     return status;
+  }
+
+  private static HasValidLength(inputValue: string, minLength: number, maxLength: number): boolean {
+    if (!this.IsValidLengthValue(minLength) && !this.IsValidLengthValue(maxLength))
+      return true;
+
+    if (this.IsValidLengthValue(minLength) && inputValue.length < minLength ||
+        this.IsValidLengthValue(maxLength) && inputValue.length > maxLength)
+      return false;
+
+    return true;
+  }
+
+  private static IsValidLengthValue(value: number): boolean {
+    return !isNaN(value) && value !== 0;
+  }
+
+  private static GetInputLengthErrorMessage(inputValue: string, minLength: number, maxLength: number): string {
+    let errorMessage = '';
+
+    if (this.IsValidLengthValue(minLength) && inputValue.length < minLength)
+      errorMessage = `Entry must be greater than ${minLength} characters`;
+
+    if (!this.IsValidLengthValue(minLength) && this.IsValidLengthValue(maxLength) && inputValue.length > maxLength)
+      errorMessage = `Entry must be less than ${maxLength} characters`;
+
+    if (this.IsValidLengthValue(minLength) && this.IsValidLengthValue(maxLength) && inputValue.length > maxLength)
+      errorMessage += `${errorMessage} and less than ${maxLength} characters`;
+
+    return errorMessage.length > 0 ? `${errorMessage}.` : 'Error';
   }
 }
