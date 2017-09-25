@@ -67,9 +67,8 @@ export class FormValidator {
     else {
       if (allowEmpty && !inputValue.length)
         valid = 1;
-      else if (!this.HasValidLength(inputValue, parseInt(minLength, 10), parseInt(maxLength, 10))) {
+      else if (!this.HasValidLength(inputValue, parseInt(minLength, 10), parseInt(maxLength, 10)))
         valid = -2;
-      }
       else
         valid = this.ValidateRule(type, inputValue, allowEmpty);
     }
@@ -321,7 +320,7 @@ export class FormValidator {
       case 'phone':
         if (!allowEmpty && !value.length) return -1;
         const digits = value.match(/\d+/g);
-        status = digits.length > 0 && /^(?=(?:.{7}|.{10})$)[0-9]*$/.test(digits.join('')) ? 1 : 0;        
+        status = digits.length > 0 && /^(?=(?:.{7}|.{10})$)[0-9]*$/.test(digits.join('')) ? 1 : 0;
         break;
 
       case 'file':
