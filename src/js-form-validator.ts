@@ -1,5 +1,12 @@
 import { closest } from './github/gtmsportswear/js-utilities@1.0.0/js-utilities';
 
+enum ValidationTypes {
+  InvalidLength = -2,
+  Empty = -1,
+  Failure = 0,
+  Pass = 1
+}
+
 export class FormValidator {
   /**
    * Validates a given input if validation attributes are present.
@@ -24,7 +31,7 @@ export class FormValidator {
       inputId = element.getAttribute('data-validate_message_id');
 
     let inputValue = input.value,
-      valid = 0,
+      valid = ValidationTypes.Failure,
       tooltip = '',
       invalidMsg = element.getAttribute('data-validate_message'),
       emptyMsg = element.getAttribute('data-empty_message');
@@ -56,24 +63,24 @@ export class FormValidator {
       });
 
       if (numChecked > 0)
-        valid = 1;
+        valid = ValidationTypes.Pass;
     }
     else if (type === 'select') {
       const selectedIndex = selectElement.selectedIndex, 
             selectedOption = selectElement.options[selectedIndex];
 
-      valid = (allowEmpty || (selectedIndex !== -1 && selectedOption.getAttribute('disabled') === null)) ? 1 : -1;
+      valid = (allowEmpty || (selectedIndex !== -1 && selectedOption.getAttribute('disabled') === null)) ? ValidationTypes.Pass : ValidationTypes.Empty;
     }
     else {
       if (allowEmpty && !inputValue.length)
-        valid = 1;
+        valid = ValidationTypes.Pass;
       else if (!this.HasValidLength(inputValue, parseInt(minLength, 10), parseInt(maxLength, 10)))
-        valid = -2;
+        valid = ValidationTypes.InvalidLength;
       else
         valid = this.ValidateRule(type, inputValue, allowEmpty);
     }
 
-    if (valid > 0) {
+    if (valid === ValidationTypes.Pass) {
       if (null === inputId) {
         const st = wrap.querySelector('[class^="simptip"]');
         wrap.classList.remove('error');
@@ -97,9 +104,9 @@ export class FormValidator {
         wrap.classList.remove('approved');
       }
 
-      if (valid === 0)
+      if (valid === ValidationTypes.Failure)
         tooltip = invalidMsg;
-      else if (valid === -2)
+      else if (valid === ValidationTypes.InvalidLength)
         tooltip = this.GetInputLengthErrorMessage(inputValue, parseInt(minLength, 10), parseInt(maxLength, 10));
       else
         tooltip = emptyMsg;
@@ -262,74 +269,74 @@ export class FormValidator {
       -1: empty
   */
   private static ValidateRule(type: string, value: any, allowEmpty: boolean): number {
-    let status = 0;
+    let status = ValidationTypes.Failure;
 
     switch (type) {
       case 'email':
-        if (!value.length) return -1;
-        else if (value.length > 50) return 0;
-        status = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(value) ? 1 : 0;
+        if (!value.length) return ValidationTypes.Empty;
+        else if (value.length > 50) return ValidationTypes.Failure;
+        status = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(value) ? ValidationTypes.Pass : ValidationTypes.Failure;
         break;
 
       case 'password_old':
-        if (!allowEmpty && !value.length) return -1;
-        status = value.length > 0 ? 1 : -1;
+        if (!allowEmpty && !value.length) return ValidationTypes.Empty;
+        status = value.length > 0 ? ValidationTypes.Failure : ValidationTypes.Empty;
         break;
 
       case 'password':
-        if (!value.length) return -1;
-        status = /^(?=.*[a-zA-Z])(?=.*\d).{8,50}$/.test(value) ? 1 : 0;
+        if (!value.length) return ValidationTypes.Empty;
+        status = /^(?=.*[a-zA-Z])(?=.*\d).{8,50}$/.test(value) ? ValidationTypes.Pass : ValidationTypes.Failure;
         break;
 
       case 'name':
-        if (!value.length) return -1;
-        status = /^[A-Z0-9\-\,\.\'\& ]{2,36}$/i.test(value) ? 1 : 0;
+        if (!value.length) return ValidationTypes.Empty;
+        status = /^[A-Z0-9\-\,\.\'\& ]{2,36}$/i.test(value) ? ValidationTypes.Pass : ValidationTypes.Failure;
         break;
 
       case 'dropdown':
-        status = (undefined !== value && null !== value && value !== '0' && value.length > 0) ? 1 : 0;
+        status = (undefined !== value && null !== value && value !== '0' && value.length > 0) ? ValidationTypes.Pass : ValidationTypes.Failure;
         break;
 
       case 'addressStreet':
-        if (!allowEmpty && !value.length) return -1;
-        status = (/^[0-9a-z\.\-\,\#\%\&\*\+\' ]+$/i.test(value)) ? 1 : 0;
+        if (!allowEmpty && !value.length) return ValidationTypes.Empty;
+        status = (/^[0-9a-z\.\-\,\#\%\&\*\+\' ]+$/i.test(value)) ? ValidationTypes.Pass : ValidationTypes.Failure;
         break;
 
       case 'addressStreetNoPO':
-        if (!allowEmpty && !value.length) return -1;
+        if (!allowEmpty && !value.length) return ValidationTypes.Empty;
         if (this.ValidateRule('addressStreet', value, allowEmpty) === 1)
-          status = (value.toLowerCase().split('.').join('').indexOf('po box') >= 0) ? 0 : 1;
+          status = (value.toLowerCase().split('.').join('').indexOf('po box') >= 0) ? ValidationTypes.Pass : ValidationTypes.Failure;
         break;
 
       case 'city':
-        if (!value.length) return -1;
-        status = /^[A-Z0-9\#\'\&\.\- ]{2,20}$/i.test(value) ? 1 : 0;
+        if (!value.length) return ValidationTypes.Empty;
+        status = /^[A-Z0-9\#\'\&\.\- ]{2,20}$/i.test(value) ? ValidationTypes.Pass : ValidationTypes.Failure;
         break;
 
       case 'zip':
-        if (!allowEmpty && !value.length) return -1;
-        status = /^[0-9]{5}(\-|\+)?([0-9]{4})?$/.test(value) ? 1 : 0;
+        if (!allowEmpty && !value.length) return ValidationTypes.Empty;
+        status = /^[0-9]{5}(\-|\+)?([0-9]{4})?$/.test(value) ? ValidationTypes.Pass : ValidationTypes.Failure;
         break;
 
       case 'zip--canada':
-        if (!allowEmpty && !value.length) return -1;
-        status = /^[ABCEGHJKLMNPRSTVXY]{1}\d{1}[A-Z]{1} *\d{1}[A-Z]{1}\d{1}$/.test(value) ? 1 : 0;
+        if (!allowEmpty && !value.length) return ValidationTypes.Empty;
+        status = /^[ABCEGHJKLMNPRSTVXY]{1}\d{1}[A-Z]{1} *\d{1}[A-Z]{1}\d{1}$/.test(value) ? ValidationTypes.Pass : ValidationTypes.Failure;
         break;
 
       case 'phone':
-        if (!allowEmpty && !value.length) return -1;
+        if (!allowEmpty && !value.length) return ValidationTypes.Empty;
         const digits = value.match(/\d+/g);
-        status = digits.length > 0 && /^(?=(?:.{7}|.{10})$)[0-9]*$/.test(digits.join('')) ? 1 : 0;
+        status = digits.length > 0 && /^(?=(?:.{7}|.{10})$)[0-9]*$/.test(digits.join('')) ? ValidationTypes.Pass : ValidationTypes.Failure;
         break;
 
       case 'file':
-        if (!allowEmpty && !value.length) return -1;
-        status = value.length > 0 ? 1 : 0;
+        if (!allowEmpty && !value.length) return ValidationTypes.Empty;
+        status = value.length > 0 ? ValidationTypes.Pass : ValidationTypes.Failure;
         break;
 
       case 'text':
-        if (!allowEmpty && !value.length) return -1;
-        status = /^[A-Z0-9\-\.\,\'\"\_\(\)\*\&\^\%\$\#\@\!\+\[\]\=\{\}\:\;\?\\\/<> ]+$/im.test(value) ? 1 : 0;
+        if (!allowEmpty && !value.length) return ValidationTypes.Empty;
+        status = /^[A-Z0-9\-\.\,\'\"\_\(\)\*\&\^\%\$\#\@\!\+\[\]\=\{\}\:\;\?\\\/<> ]+$/im.test(value) ? ValidationTypes.Pass : ValidationTypes.Failure;
         break;
 
       case 'checkbox':
@@ -337,28 +344,28 @@ export class FormValidator {
         break;
 
       case 'creditcard':
-        if (!allowEmpty && !value.length) return -1;
+        if (!allowEmpty && !value.length) return ValidationTypes.Empty;
         // will check against VISA, Discover, Amex, and MasterCard
-        status = /^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|3[47][0-9]{13}|6(?:0110[0-9]|011[2-4][0-9]|01174|0117[7-9]|0118[6-9]|0119[0-9]|4[4-9][0-9]{3}|5[0-9]{4})[0-9]{10})$/.test(value) ? 1 : 0;
+        status = /^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|3[47][0-9]{13}|6(?:0110[0-9]|011[2-4][0-9]|01174|0117[7-9]|0118[6-9]|0119[0-9]|4[4-9][0-9]{3}|5[0-9]{4})[0-9]{10})$/.test(value) ? ValidationTypes.Pass : ValidationTypes.Failure;
         break;
 
       case 'creditcard-cvs':
-        if (!allowEmpty && !value.length) return -1;
-        status = /^[0-9]{3,5}$/.test(value) ? 1 : 0;
+        if (!allowEmpty && !value.length) return ValidationTypes.Empty;
+        status = /^[0-9]{3,5}$/.test(value) ? ValidationTypes.Pass : ValidationTypes.Failure;
         break;
 
       case 'ponumber':
-        if (!allowEmpty && !value.length) return -1;
-        status = /^[0-9a-z \,\.\-\%\$\#\@\&\(\)\_]+$/i.test(value) ? 1 : 0;
+        if (!allowEmpty && !value.length) return ValidationTypes.Empty;
+        status = /^[0-9a-z \,\.\-\%\$\#\@\&\(\)\_]+$/i.test(value) ? ValidationTypes.Pass : ValidationTypes.Failure;
         break;
 
       case 'promocode':
-        if (!allowEmpty && !value.length) return -1;
-        status = /^[0-9a-z]+$/i.test(value) ? 1 : 0;
+        if (!allowEmpty && !value.length) return ValidationTypes.Empty;
+        status = /^[0-9a-z]+$/i.test(value) ? ValidationTypes.Pass : ValidationTypes.Failure;
         break;
 
       default:
-        status = 0;
+        status = ValidationTypes.Failure;
     }
     return status;
   }
