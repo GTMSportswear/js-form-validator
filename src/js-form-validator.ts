@@ -382,7 +382,7 @@ export class FormValidator {
   }
 
   private static GetInputLengthErrorMessage(inputValue: string, minLength: number, maxLength: number): string {
-    let errorMessage = '';
+    let errorMessage = 'Error';
 
     if (!this.IsValidLengthAttributeValue(minLength) && !this.IsValidLengthAttributeValue(maxLength))
       return errorMessage;
