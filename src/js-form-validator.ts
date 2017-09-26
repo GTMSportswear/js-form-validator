@@ -99,9 +99,8 @@ export class FormValidator {
 
       if (valid === 0)
         tooltip = invalidMsg;
-      else if (valid === -2) {
+      else if (valid === -2)
         tooltip = this.GetInputLengthErrorMessage(inputValue, parseInt(minLength, 10), parseInt(maxLength, 10));
-      }
       else
         tooltip = emptyMsg;
     }
@@ -365,34 +364,32 @@ export class FormValidator {
   }
 
   private static HasValidLength(inputValue: string, minLength: number, maxLength: number): boolean {
-    if (!this.IsValidLengthValue(minLength) && !this.IsValidLengthValue(maxLength))
+    if (!this.IsValidLengthAttributeValue(minLength) && !this.IsValidLengthAttributeValue(maxLength))
       return true;
 
-    if (this.IsValidLengthValue(minLength) && inputValue.length < minLength ||
-        this.IsValidLengthValue(maxLength) && inputValue.length > maxLength)
+    if ((this.IsValidLengthAttributeValue(minLength) && inputValue.length < minLength) ||
+        (this.IsValidLengthAttributeValue(maxLength) && inputValue.length > maxLength))
       return false;
 
     return true;
   }
 
-  private static IsValidLengthValue(value: number): boolean {
-    return !isNaN(value) && value !== 0;
-  }
-
   private static GetInputLengthErrorMessage(inputValue: string, minLength: number, maxLength: number): string {
     let errorMessage = '';
 
-    if (this.IsValidLengthValue(minLength) && inputValue.length < minLength)
+    if (this.IsValidLengthAttributeValue(minLength) && inputValue.length < minLength)
       errorMessage = `Entry must be greater than ${minLength} characters`;
 
-    if (!this.IsValidLengthValue(minLength) && this.IsValidLengthValue(maxLength) && inputValue.length > maxLength)
+    if (!this.IsValidLengthAttributeValue(minLength) && this.IsValidLengthAttributeValue(maxLength) && inputValue.length > maxLength)
       errorMessage = `Entry must be less than ${maxLength} characters`;
 
-    if (this.IsValidLengthValue(minLength) && this.IsValidLengthValue(maxLength) && inputValue.length > maxLength)
+    if (this.IsValidLengthAttributeValue(minLength) && this.IsValidLengthAttributeValue(maxLength) && inputValue.length > maxLength)
       errorMessage += `${errorMessage} and less than ${maxLength} characters`;
 
     return errorMessage.length > 0 ? `${errorMessage}.` : 'Error';
   }
+
+    private static IsValidLengthAttributeValue(value: number): boolean {
+    return !isNaN(value) && value !== 0;
+  }
 }
-const digits = value.match(/\d+/g);
- status = digits.length > 0 && /^(?=(?:.{7}|.{10})$)[0-9]*$/.test(digits.join('')) ? 1 : 0;
