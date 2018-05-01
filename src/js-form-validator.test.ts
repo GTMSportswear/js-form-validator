@@ -53,3 +53,35 @@ QUnit.test('should pass phone validation with 10 digits and characters', assert 
 
   assert.equal(FormValidator.Validate(inputElement), true);
 });
+
+QUnit.test('should pass email validation with valid email', assert => {
+  inputElement.setAttribute('type', 'text');
+  inputElement.setAttribute('data-validate', 'email');
+  inputElement.value = 'anonymous@gmail.com';
+
+  assert.equal(FormValidator.Validate(inputElement), true);
+});
+
+QUnit.test('should fail email validation with more than 50 characters', assert => {
+  inputElement.setAttribute('type', 'text');
+  inputElement.setAttribute('data-validate', 'email');
+  inputElement.value = 'anonymousanonymousanonymousanonymousanonymous@gmail.com';
+
+  assert.equal(FormValidator.Validate(inputElement), false);
+});
+
+QUnit.test('should fail email validation without At sign', assert => {
+  inputElement.setAttribute('type', 'text');
+  inputElement.setAttribute('data-validate', 'email');
+  inputElement.value = 'anonymous';
+
+  assert.equal(FormValidator.Validate(inputElement), false);
+});
+
+QUnit.test('should fail email validation with special characters in domain', assert => {
+  inputElement.setAttribute('type', 'text');
+  inputElement.setAttribute('data-validate', 'email');
+  inputElement.value = 'anonymous@gmail#.com';
+
+  assert.equal(FormValidator.Validate(inputElement), false);
+});
