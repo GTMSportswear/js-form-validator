@@ -275,7 +275,7 @@ export class FormValidator {
       case 'email':
         if (!value.length) return ValidationStatus.Empty;
         else if (value.length > 50) return ValidationStatus.Failure;
-        status = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(value) ? ValidationStatus.Pass : ValidationStatus.Failure;
+        status = /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/i.test(value) ? ValidationStatus.Pass : ValidationStatus.Failure;
         break;
 
       case 'password_old':
