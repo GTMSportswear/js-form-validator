@@ -85,3 +85,31 @@ QUnit.test('should fail email validation with special characters in domain', ass
 
   assert.equal(FormValidator.Validate(inputElement), false);
 });
+
+QUnit.test('should fail checkbox validation when checked state is not set', assert => {
+  inputElement.setAttribute('type', 'checkbox');
+  inputElement.setAttribute('data-validate', 'checkbox');
+
+  assert.equal(FormValidator.Validate(inputElement), false);
+});
+
+QUnit.test('should fail checkbox validation when checked state set to false', assert => {
+  inputElement.setAttribute('type', 'checkbox');
+  inputElement.setAttribute('data-validate', 'checkbox');
+  inputElement.checked = false;
+
+  assert.equal(FormValidator.Validate(inputElement), false);
+  assert.notEqual(simptip.getAttribute('data-tooltip'), null);
+  assert.equal(inputWrap.classList.contains('error'), true);
+});
+
+QUnit.test('should pass checkbox validation when checked state is set to true', assert => {
+  inputElement.setAttribute('type', 'checkbox');
+  inputElement.setAttribute('data-validate', 'checkbox');
+  inputElement.checked = true;
+
+  assert.equal(FormValidator.Validate(inputElement), true);
+  assert.equal(simptip.getAttribute('data-tooltip'), null);
+  assert.equal(inputWrap.classList.contains('error'), false);
+  assert.equal(inputWrap.classList.contains('approved'), true);
+});
