@@ -23,7 +23,7 @@ QUnit.test('should pass phone validation with 7 digits', assert => {
   inputElement.setAttribute('data-validate', 'phone');
   inputElement.value = '1234567';
 
-  assert.equal(FormValidator.Validate(inputElement), true);
+  assert.ok(FormValidator.Validate(inputElement));
 });
 
 QUnit.test('should pass phone validation with 10 digits', assert => {
@@ -31,7 +31,7 @@ QUnit.test('should pass phone validation with 10 digits', assert => {
   inputElement.setAttribute('data-validate', 'phone');
   inputElement.value = '1234567890';
 
-  assert.equal(FormValidator.Validate(inputElement), true);
+  assert.ok(FormValidator.Validate(inputElement));
 });
 
 QUnit.test('should fail phone validation without 7 or 10 digits', assert => {
@@ -39,11 +39,11 @@ QUnit.test('should fail phone validation without 7 or 10 digits', assert => {
   inputElement.setAttribute('data-validate', 'phone');
   inputElement.value = '12345678';
 
-  assert.equal(FormValidator.Validate(inputElement), false);
+  assert.notOk(FormValidator.Validate(inputElement));
 
   inputElement.value = '123456';
 
-  assert.equal(FormValidator.Validate(inputElement), false);
+  assert.notOk(FormValidator.Validate(inputElement));
 });
 
 QUnit.test('should pass phone validation with 10 digits and characters', assert => {
@@ -51,7 +51,7 @@ QUnit.test('should pass phone validation with 10 digits and characters', assert 
   inputElement.setAttribute('data-validate', 'phone');
   inputElement.value = '(123) 456-7890';
 
-  assert.equal(FormValidator.Validate(inputElement), true);
+  assert.ok(FormValidator.Validate(inputElement));
 });
 
 QUnit.test('should pass email validation with valid email', assert => {
@@ -59,7 +59,7 @@ QUnit.test('should pass email validation with valid email', assert => {
   inputElement.setAttribute('data-validate', 'email');
   inputElement.value = 'anonymous@gmail.com';
 
-  assert.equal(FormValidator.Validate(inputElement), true);
+  assert.ok(FormValidator.Validate(inputElement));
 });
 
 QUnit.test('should fail email validation with more than 50 characters', assert => {
@@ -67,7 +67,7 @@ QUnit.test('should fail email validation with more than 50 characters', assert =
   inputElement.setAttribute('data-validate', 'email');
   inputElement.value = 'anonymousanonymousanonymousanonymousanonymous@gmail.com';
 
-  assert.equal(FormValidator.Validate(inputElement), false);
+  assert.notOk(FormValidator.Validate(inputElement));
 });
 
 QUnit.test('should fail email validation without At sign', assert => {
@@ -75,7 +75,7 @@ QUnit.test('should fail email validation without At sign', assert => {
   inputElement.setAttribute('data-validate', 'email');
   inputElement.value = 'anonymous';
 
-  assert.equal(FormValidator.Validate(inputElement), false);
+  assert.notOk(FormValidator.Validate(inputElement));
 });
 
 QUnit.test('should fail email validation with special characters in domain', assert => {
@@ -83,14 +83,14 @@ QUnit.test('should fail email validation with special characters in domain', ass
   inputElement.setAttribute('data-validate', 'email');
   inputElement.value = 'anonymous@gmail#.com';
 
-  assert.equal(FormValidator.Validate(inputElement), false);
+  assert.notOk(FormValidator.Validate(inputElement));
 });
 
 QUnit.test('should fail checkbox validation when checked state is not set', assert => {
   inputElement.setAttribute('type', 'checkbox');
   inputElement.setAttribute('data-validate', 'checkbox');
 
-  assert.equal(FormValidator.Validate(inputElement), false);
+  assert.notOk(FormValidator.Validate(inputElement));
 });
 
 QUnit.test('should fail checkbox validation when checked state set to false', assert => {
@@ -98,9 +98,9 @@ QUnit.test('should fail checkbox validation when checked state set to false', as
   inputElement.setAttribute('data-validate', 'checkbox');
   inputElement.checked = false;
 
-  assert.equal(FormValidator.Validate(inputElement), false);
+  assert.notOk(FormValidator.Validate(inputElement));
   assert.notEqual(simptip.getAttribute('data-tooltip'), null);
-  assert.equal(inputWrap.classList.contains('error'), true);
+  assert.ok(inputWrap.classList.contains('error'));
 });
 
 QUnit.test('should pass checkbox validation when checked state is set to true', assert => {
@@ -108,8 +108,19 @@ QUnit.test('should pass checkbox validation when checked state is set to true', 
   inputElement.setAttribute('data-validate', 'checkbox');
   inputElement.checked = true;
 
-  assert.equal(FormValidator.Validate(inputElement), true);
+  assert.ok(FormValidator.Validate(inputElement));
   assert.equal(simptip.getAttribute('data-tooltip'), null);
-  assert.equal(inputWrap.classList.contains('error'), false);
-  assert.equal(inputWrap.classList.contains('approved'), true);
+  assert.notOk(inputWrap.classList.contains('error'));
+  assert.ok(inputWrap.classList.contains('approved'));
+});
+
+QUnit.test('should pass checkbox validation when checked state is not set and allowed empty attribute is set', assert => {
+  inputElement.setAttribute('type', 'checkbox');
+  inputElement.setAttribute('data-validate', 'checkbox');
+  inputElement.setAttribute('data-empty_allowed', '1');
+
+  assert.ok(FormValidator.Validate(inputElement));
+  assert.equal(simptip.getAttribute('data-tooltip'), null);
+  assert.notOk(inputWrap.classList.contains('error'));
+  assert.ok(inputWrap.classList.contains('approved'));
 });

@@ -48,7 +48,7 @@ export class FormValidator {
       emptyMsg = invalidMsg = 'Error';
 
     if (type === 'checkbox')
-      valid = input.checked ? ValidationStatus.Pass : ValidationStatus.Failure;
+      valid = input.checked || allowEmpty ? ValidationStatus.Pass : ValidationStatus.Failure;
     else if (type === 'checkbox-list') {
       const inputs = input.querySelectorAll('input[type="checkbox"]');
       let numChecked = 0;
