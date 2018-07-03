@@ -47,11 +47,9 @@ export class FormValidator {
     else if (null === emptyMsg && null === invalidMsg)
       emptyMsg = invalidMsg = 'Error';
 
-    // if we are dealing with a checkbox, need to get on/off instead of value
     if (type === 'checkbox')
-      inputValue = input.checked ? 'on' : 'off';
-
-    if (type === 'checkbox-list') {
+      valid = input.checked || allowEmpty ? ValidationStatus.Pass : ValidationStatus.Failure;
+    else if (type === 'checkbox-list') {
       const inputs = input.querySelectorAll('input[type="checkbox"]');
       let numChecked = 0;
 
